@@ -33,10 +33,13 @@ func LoadConfig() (*configs.Config, error) {
 	}
 
 	userRepo := repositories.NewUserRepository(db)
+	postRepo := repositories.NewPostRepository(db)
 
 	authService := services.NewAuthService(userRepo)
+	postService := services.NewPostService(postRepo)
 
 	authHandler := handlers.NewAuthHandler(&authService, authConfig.SecretKey, authConfig.TTL)
+	postHandler := handlers.NewPostHandler(&postService)
 
 	return &configs.Config{
 		DB:   db,
@@ -44,6 +47,7 @@ func LoadConfig() (*configs.Config, error) {
 		Auth: authConfig,
 		Handlers: &configs.Handlers{
 			AuthHandler: authHandler,
+			PostHandler: postHandler,
 		},
 	}, nil
 }
@@ -55,7 +59,7 @@ func NewApp() *App {
 	}
 
 	router := gin.Default()
-	routes.SetupRoutes(router, cfg.Handlers)
+	routes.SetupRoutes(cfg.Auth.SecretKey, router, cfg.Handlers)
 
 	return &App{
 		Router: router,
