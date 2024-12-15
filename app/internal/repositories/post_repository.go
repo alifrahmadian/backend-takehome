@@ -9,6 +9,7 @@ import (
 type PostRepository interface {
 	CreatePost(post *models.Post) (*models.Post, error)
 	GetPostByID(id int64) (*models.Post, error)
+	GetAllPosts() ([]*models.Post, error)
 }
 
 type postRepository struct {
@@ -91,4 +92,58 @@ func (r *postRepository) GetPostByID(id int64) (*models.Post, error) {
 	}
 
 	return post, nil
+}
+
+func (r *postRepository) GetAllPosts() ([]*models.Post, error) {
+	var posts []*models.Post
+
+	query := `
+		SELECT
+			posts.id,
+			title,
+			content,
+			author_id,
+			users.id,
+			users.name,
+			users.email,
+			posts.created_at,
+			posts.updated_at
+		FROM
+			posts
+		LEFT JOIN
+			users ON author_id = users.id
+	`
+
+	rows, err := r.DB.Query(query)
+	if err != nil {
+		return nil, err
+	}
+
+	for rows.Next() {
+		post := &models.Post{}
+		err := rows.Scan(
+			&post.ID,
+			&post.Title,
+			&post.Content,
+			&post.AuthorID,
+			&post.User.ID,
+			&post.User.Name,
+			&post.User.Email,
+			&post.CreatedAt,
+			&post.UpdatedAt,
+		)
+
+		if err != nil {
+			return nil, err
+		}
+
+		posts = append(posts, post)
+	}
+
+	err = rows.Err()
+	if err != nil {
+		return nil, err
+	}
+
+	return posts, nil
 }

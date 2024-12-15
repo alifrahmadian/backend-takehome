@@ -104,3 +104,31 @@ func (h *PostHandler) GetPostByID(c *gin.Context) {
 
 	responses.SuccessResponse(c, messages.MsgGetPostSuccessful, resp)
 }
+
+func (h *PostHandler) GetAllPosts(c *gin.Context) {
+	posts, err := h.PostService.GetAllPosts()
+	if err != nil {
+		responses.ErrorResponse(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	responseData := make([]*dtos.GetPostResponse, len(posts))
+
+	for i, post := range posts {
+		responseData[i] = &dtos.GetPostResponse{
+			ID:       post.ID,
+			Title:    post.Title,
+			Content:  post.Content,
+			AuthorID: post.AuthorID,
+			User: dtos.UserResponse{
+				ID:    post.User.ID,
+				Name:  post.User.Name,
+				Email: post.User.Email,
+			},
+			CreatedAt: post.CreatedAt,
+			UpdatedAt: post.UpdatedAt,
+		}
+	}
+
+	responses.SuccessResponse(c, messages.MsgGetPostsSuccessful, responseData)
+}

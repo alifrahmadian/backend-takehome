@@ -8,9 +8,6 @@ import (
 )
 
 func SetupRoutes(secretKey string, router *gin.Engine, handlers *configs.Handlers) {
-	postsRoutes := router.Group("/posts")
-	// commentRoutes := router.Group("/posts/:id/comments")
-
 	publicRoutes := router.Group("")
 	{
 		// Authentication Routes
@@ -18,14 +15,15 @@ func SetupRoutes(secretKey string, router *gin.Engine, handlers *configs.Handler
 		publicRoutes.POST("/login", handlers.AuthHandler.Login)
 
 		// Post Routes
-		postsRoutes.GET("/:id", handlers.PostHandler.GetPostByID)
+		publicRoutes.GET("/posts/:id", handlers.PostHandler.GetPostByID)
+		publicRoutes.GET("/posts", handlers.PostHandler.GetAllPosts)
 	}
 
 	privateRoutes := router.Group("")
 	privateRoutes.Use(middlewares.AuthMiddleware(secretKey))
 	{
 		// Posts Routes
-		postsRoutes.POST("", handlers.PostHandler.CreatePost)
+		privateRoutes.POST("/posts", handlers.PostHandler.CreatePost)
 
 		// Comments Routes
 	}
