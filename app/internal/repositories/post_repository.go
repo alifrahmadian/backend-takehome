@@ -10,6 +10,7 @@ type PostRepository interface {
 	CreatePost(post *models.Post) (*models.Post, error)
 	GetPostByID(id int64) (*models.Post, error)
 	GetAllPosts() ([]*models.Post, error)
+	UpdatePost(post *models.Post) (*models.Post, error)
 }
 
 type postRepository struct {
@@ -146,4 +147,18 @@ func (r *postRepository) GetAllPosts() ([]*models.Post, error) {
 	}
 
 	return posts, nil
+}
+
+func (r *postRepository) UpdatePost(post *models.Post) (*models.Post, error) {
+	query := `
+		UPDATE posts
+		SET title = ?, content = ?, updated_at = ?
+		WHERE id = ?
+	`
+	_, err := r.DB.Exec(query, post.Title, post.Content, post.UpdatedAt, post.ID)
+	if err != nil {
+		return nil, err
+	}
+
+	return post, nil
 }

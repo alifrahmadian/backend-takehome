@@ -7,7 +7,6 @@ import (
 	"app/internal/services"
 	"app/pkg/errors"
 	"app/pkg/messages"
-	"fmt"
 	"net/http"
 	"strconv"
 	"time"
@@ -30,7 +29,6 @@ func (h *PostHandler) CreatePost(c *gin.Context) {
 	var req dtos.CreatePostRequest
 
 	userID := c.GetInt64("user_id")
-	fmt.Println(userID)
 
 	err := c.ShouldBindJSON(&req)
 	if err != nil {
@@ -131,4 +129,62 @@ func (h *PostHandler) GetAllPosts(c *gin.Context) {
 	}
 
 	responses.SuccessResponse(c, messages.MsgGetPostsSuccessful, responseData)
+}
+
+func (h *PostHandler) UpdatePost(c *gin.Context) {
+	postID, err := strconv.Atoi(c.Param("id"))
+	if err != nil {
+		responses.ErrorResponse(c, http.StatusBadRequest, errors.ErrInvalidPostID.Error())
+		return
+	}
+
+	var req dtos.UpdatePostRequest
+	err = c.ShouldBindJSON(&req)
+	if err != nil {
+		responses.ErrorResponse(c, http.StatusBadRequest, errors.ErrInvalidPostRequestBody.Error())
+		return
+	}
+
+	post, err := h.PostService.GetPostByID(int64(postID))
+	if err != nil {
+		if err == errors.ErrPostNotFound {
+			responses.ErrorResponse(c, http.StatusNotFound, err.Error())
+			return
+		}
+
+		responses.ErrorResponse(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	userID := c.GetInt64("user_id")
+	if post.AuthorID != userID {
+		responses.ErrorResponse(c, http.StatusForbidden, errors.ErrUpdatePostForbidden.Error())
+		return
+	}
+
+	if req.Title != "" {
+		post.Title = req.Title
+	}
+
+	if req.Content != "" {
+		post.Content = req.Content
+	}
+
+	post.UpdatedAt = time.Now()
+
+	updatedPost, err := h.PostService.UpdatePost(post)
+	if err != nil {
+		responses.ErrorResponse(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	resp := &dtos.UpdatePostResponse{
+		ID:        updatedPost.ID,
+		Title:     updatedPost.Title,
+		Content:   updatedPost.Content,
+		AuthorID:  updatedPost.AuthorID,
+		UpdatedAt: updatedPost.UpdatedAt,
+	}
+
+	responses.SuccessResponse(c, messages.MsgUpdatePostSuccessful, resp)
 }

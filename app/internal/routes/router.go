@@ -17,6 +17,8 @@ func SetupRoutes(secretKey string, router *gin.Engine, handlers *configs.Handler
 		// Post Routes
 		publicRoutes.GET("/posts/:id", handlers.PostHandler.GetPostByID)
 		publicRoutes.GET("/posts", handlers.PostHandler.GetAllPosts)
+
+		// Comment Routes
 	}
 
 	privateRoutes := router.Group("")
@@ -24,6 +26,7 @@ func SetupRoutes(secretKey string, router *gin.Engine, handlers *configs.Handler
 	{
 		// Posts Routes
 		privateRoutes.POST("/posts", handlers.PostHandler.CreatePost)
+		privateRoutes.PUT("/posts/:id", handlers.PostHandler.UpdatePost)
 
 		// Comments Routes
 	}

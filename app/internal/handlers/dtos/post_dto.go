@@ -24,3 +24,16 @@ type GetPostResponse struct {
 	CreatedAt time.Time    `json:"created_at"`
 	UpdatedAt time.Time    `json:"updated_at"`
 }
+
+type UpdatePostRequest struct {
+	Title   string `json:"title,omitempty"`
+	Content string `json:"content,omitempty"`
+}
+
+type UpdatePostResponse struct {
+	ID        int64     `json:"id"`
+	Title     string    `json:"title"`
+	Content   string    `json:"content"`
+	AuthorID  int64     `json:"author_id"`
+	UpdatedAt time.Time `json:"updated_at"`
+}
