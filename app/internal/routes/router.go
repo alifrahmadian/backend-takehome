@@ -19,6 +19,7 @@ func SetupRoutes(secretKey string, router *gin.Engine, handlers *configs.Handler
 		publicRoutes.GET("/posts", handlers.PostHandler.GetAllPosts)
 
 		// Comment Routes
+		publicRoutes.GET("/posts/:id/comments", handlers.CommentHandler.GetCommentsByPostID)
 	}
 
 	privateRoutes := router.Group("")
@@ -30,6 +31,7 @@ func SetupRoutes(secretKey string, router *gin.Engine, handlers *configs.Handler
 		privateRoutes.DELETE("/posts/:id", handlers.PostHandler.DeletePost)
 
 		// Comments Routes
+		privateRoutes.POST("/posts/:id/comments", handlers.CommentHandler.AddComment)
 	}
 
 }

@@ -33,12 +33,12 @@ func (s *postService) CreatePost(post *models.Post) (*models.Post, error) {
 }
 
 func (s *postService) GetPostByID(id int64) (*models.Post, error) {
-	newPost, err := s.PostRepo.GetPostByID(id)
+	post, err := s.PostRepo.GetPostByID(id)
 	if err != nil {
 		return nil, err
 	}
 
-	return newPost, nil
+	return post, nil
 }
 
 func (s *postService) GetAllPosts() ([]*models.Post, error) {

@@ -34,20 +34,24 @@ func LoadConfig() (*configs.Config, error) {
 
 	userRepo := repositories.NewUserRepository(db)
 	postRepo := repositories.NewPostRepository(db)
+	commentRepo := repositories.NewCommentRepository(db)
 
 	authService := services.NewAuthService(userRepo)
 	postService := services.NewPostService(postRepo)
+	commentService := services.NewCommentService(commentRepo, postRepo)
 
 	authHandler := handlers.NewAuthHandler(&authService, authConfig.SecretKey, authConfig.TTL)
 	postHandler := handlers.NewPostHandler(&postService)
+	commentHandler := handlers.NewCommentHandler(&commentService)
 
 	return &configs.Config{
 		DB:   db,
 		Env:  env,
 		Auth: authConfig,
 		Handlers: &configs.Handlers{
-			AuthHandler: authHandler,
-			PostHandler: postHandler,
+			AuthHandler:    authHandler,
+			PostHandler:    postHandler,
+			CommentHandler: commentHandler,
 		},
 	}, nil
 }
