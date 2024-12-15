@@ -9,4 +9,5 @@ var (
 	ErrInvalidPostID          = errors.New("invalid post id")
 	ErrInvalidPostRequestBody = errors.New("invalid request body")
 	ErrUpdatePostForbidden    = errors.New("forbidden to update this post")
+	ErrDeletePostForbidden    = errors.New("forbidden to delete this post")
 )

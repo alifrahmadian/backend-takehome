@@ -27,6 +27,7 @@ func SetupRoutes(secretKey string, router *gin.Engine, handlers *configs.Handler
 		// Posts Routes
 		privateRoutes.POST("/posts", handlers.PostHandler.CreatePost)
 		privateRoutes.PUT("/posts/:id", handlers.PostHandler.UpdatePost)
+		privateRoutes.DELETE("/posts/:id", handlers.PostHandler.DeletePost)
 
 		// Comments Routes
 	}

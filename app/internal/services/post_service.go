@@ -10,6 +10,7 @@ type PostService interface {
 	GetPostByID(id int64) (*models.Post, error)
 	GetAllPosts() ([]*models.Post, error)
 	UpdatePost(post *models.Post) (*models.Post, error)
+	DeletePost(id int64) error
 }
 
 type postService struct {
@@ -56,4 +57,8 @@ func (s *postService) UpdatePost(post *models.Post) (*models.Post, error) {
 	}
 
 	return post, nil
+}
+
+func (s *postService) DeletePost(id int64) error {
+	return s.PostRepo.DeletePost(id)
 }

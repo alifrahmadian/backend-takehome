@@ -188,3 +188,36 @@ func (h *PostHandler) UpdatePost(c *gin.Context) {
 
 	responses.SuccessResponse(c, messages.MsgUpdatePostSuccessful, resp)
 }
+
+func (h *PostHandler) DeletePost(c *gin.Context) {
+	postID, err := strconv.Atoi(c.Param("id"))
+	if err != nil {
+		responses.ErrorResponse(c, http.StatusBadRequest, errors.ErrInvalidPostID.Error())
+		return
+	}
+
+	post, err := h.PostService.GetPostByID(int64(postID))
+	if err != nil {
+		if err == errors.ErrPostNotFound {
+			responses.ErrorResponse(c, http.StatusNotFound, err.Error())
+			return
+		}
+
+		responses.ErrorResponse(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	userID := c.GetInt64("user_id")
+	if post.AuthorID != userID {
+		responses.ErrorResponse(c, http.StatusForbidden, errors.ErrDeletePostForbidden.Error())
+		return
+	}
+
+	err = h.PostService.DeletePost(post.ID)
+	if err != nil {
+		responses.ErrorResponse(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	responses.SuccessResponse(c, messages.MsgDeletePostSuccessful, nil)
+}

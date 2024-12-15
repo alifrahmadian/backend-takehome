@@ -11,6 +11,7 @@ type PostRepository interface {
 	GetPostByID(id int64) (*models.Post, error)
 	GetAllPosts() ([]*models.Post, error)
 	UpdatePost(post *models.Post) (*models.Post, error)
+	DeletePost(id int64) error
 }
 
 type postRepository struct {
@@ -161,4 +162,15 @@ func (r *postRepository) UpdatePost(post *models.Post) (*models.Post, error) {
 	}
 
 	return post, nil
+}
+
+func (r *postRepository) DeletePost(id int64) error {
+	query := "DELETE FROM posts where id = ?"
+
+	_, err := r.DB.Exec(query, id)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }

@@ -7,4 +7,5 @@ var (
 	MsgGetPostSuccessful    = "get post successful!"
 	MsgGetPostsSuccessful   = "get posts successful!"
 	MsgUpdatePostSuccessful = "post updated successfully!"
+	MsgDeletePostSuccessful = "post deleted successfully!"
 )
