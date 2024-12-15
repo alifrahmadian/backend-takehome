@@ -2,11 +2,13 @@ package repositories
 
 import (
 	"app/internal/models"
+	"app/pkg/errors"
 	"database/sql"
 )
 
 type UserRepository interface {
 	CreateUser(user *models.User) error
+	GetUser(email string) (*models.User, error)
 	IsEmailExist(email string) (bool, error)
 }
 
@@ -61,4 +63,29 @@ func (r *userRepository) IsEmailExist(email string) (bool, error) {
 	}
 
 	return true, nil
+}
+
+func (r *userRepository) GetUser(email string) (*models.User, error) {
+	user := &models.User{}
+
+	query := "SELECT id, name, email, password FROM users WHERE email = ? LIMIT 1"
+
+	err := r.DB.QueryRow(
+		query,
+		email,
+	).Scan(
+		&user.ID,
+		&user.Name,
+		&user.Email,
+		&user.Password,
+	)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, errors.ErrUserNotExist
+		}
+
+		return nil, err
+	}
+
+	return user, nil
 }

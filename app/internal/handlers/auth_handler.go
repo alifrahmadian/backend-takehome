@@ -7,6 +7,7 @@ import (
 	"app/internal/services"
 	"app/pkg/errors"
 	"app/pkg/messages"
+	"app/pkg/utils"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -38,6 +39,11 @@ func (h *AuthHandler) Register(c *gin.Context) {
 				responses.ErrorResponse(c, http.StatusBadRequest, errors.ErrNameRequired.Error())
 				return
 			case "Email":
+				if err.Tag() == "email" {
+					responses.ErrorResponse(c, http.StatusBadRequest, errors.ErrInvalidEmailFormat.Error())
+					return
+				}
+
 				responses.ErrorResponse(c, http.StatusBadRequest, errors.ErrEmailRequired.Error())
 				return
 			case "Password":
@@ -65,4 +71,50 @@ func (h *AuthHandler) Register(c *gin.Context) {
 	}
 
 	responses.SuccessResponse(c, messages.MsgRegisterSuccess, nil)
+}
+
+func (h *AuthHandler) Login(c *gin.Context) {
+	var req dtos.LoginRequest
+
+	err := c.ShouldBindJSON(&req)
+	if err != nil {
+		for _, err := range err.(validator.ValidationErrors) {
+			switch err.Field() {
+			case "Email":
+				if err.Tag() == "email" {
+					responses.ErrorResponse(c, http.StatusBadRequest, errors.ErrInvalidEmailFormat.Error())
+					return
+				}
+
+				responses.ErrorResponse(c, http.StatusBadRequest, errors.ErrEmailRequired.Error())
+				return
+			case "Password":
+				responses.ErrorResponse(c, http.StatusBadRequest, errors.ErrPasswordRequired.Error())
+				return
+			}
+		}
+	}
+
+	user := &models.User{
+		Email:    req.Email,
+		Password: req.Password,
+	}
+
+	userModel, err := h.AuthService.Login(user.Email, user.Password)
+	if err != nil {
+		responses.ErrorResponse(c, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	token, err := utils.GenerateToken(userModel, h.SecretKey, h.TTL)
+	if err != nil {
+		responses.ErrorResponse(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	resp := &dtos.LoginResponse{
+		Token: token,
+	}
+
+	responses.SuccessResponse(c, messages.MsgLoginSuccess, resp)
 }

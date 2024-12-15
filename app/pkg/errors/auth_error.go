@@ -8,4 +8,6 @@ var (
 	ErrEmailRequired      = errors.New("email is required")
 	ErrPasswordRequired   = errors.New("password is required")
 	ErrInvalidEmailFormat = errors.New("email format is invalid")
+	ErrUserNotExist       = errors.New("this user is not exist")
+	ErrInvalidPassword    = errors.New("invalid password")
 )
